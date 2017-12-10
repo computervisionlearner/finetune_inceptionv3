@@ -13,7 +13,7 @@ FINAL_TENSORNAME = 'final_result:0'
 RESIZED_INPUT_TENSOR_NAME = 'ResizeBilinear:0'
 HEIGHT = 299
 WIDTH = 299
-lines = tf.gfile.GFile('output_labels.txt').readlines()
+lines = tf.gfile.GFile('output_labels.txt2600').readlines()
 uid_to_human = {}
 for uid,line in enumerate(lines) :
     line=line.strip('\n')
@@ -38,22 +38,24 @@ def preprocess_test(decoded_image, center_rate = 0.875, height = HEIGHT, width =
     return image
   
   
-graph = tf.Graph()
 
-with tf.gfile.FastGFile('imagenet/classify_image_graph_def.pb','rb') as file:
-  graph_def = tf.GraphDef()
-  graph_def.ParseFromString(file.read())
-  final_tensor, resized_input_tensor = tf.import_graph_def(graph_def, name='', return_elements=[FINAL_TENSORNAME,
-              RESIZED_INPUT_TENSOR_NAME])
+with tf.Graph().as_default() as graph:
+  with tf.gfile.FastGFile('output_graph.pb2600','rb') as file:
+    graph_def = tf.GraphDef()
+    graph_def.ParseFromString(file.read())
+    final_tensor, resized_input_tensor = tf.import_graph_def(graph_def, name='', return_elements=[FINAL_TENSORNAME,
+                RESIZED_INPUT_TENSOR_NAME])
 
 result = []
-with tf.Session() as sess:
+with tf.Session(graph = graph) as sess:
   for root, dirs, files in os.walk('images/'):
     for file in files:
       image_string = tf.gfile.FastGFile(os.path.join(root,file), 'rb').read()
+      image_string_placeholder = tf.placeholder(dtype = tf.string, name = 'input_placeholder')
       decoded_image = tf.image.decode_jpeg(image_string, channels=3)
       processed_image = preprocess_test(decoded_image)
-      predictions = sess.run(final_tensor, feed_dict = {resized_input_tensor: processed_image})
+      image_value = sess.run(processed_image, feed_dict = {image_string_placeholder : image_string})
+      predictions = sess.run(final_tensor, feed_dict = {resized_input_tensor: image_value})
       predictions = np.squeeze(predictions)
       image_name = int(os.path.basename(file).split('.')[0])
       top_k = predictions.argsort()[::-1]
@@ -64,9 +66,4 @@ with tf.Session() as sess:
         
 np.save('result',result)
         
-    
   
-  
-  
-
-
