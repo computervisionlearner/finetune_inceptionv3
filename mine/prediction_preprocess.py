@@ -22,7 +22,7 @@ for uid,line in enumerate(lines) :
 def id_to_string(node_id):
     if node_id not in uid_to_human:
         return ''
-    return uid_to_human[node_id]
+    return uid_to_human(node_id)
 
 def preprocess_test(decoded_image, center_rate = 0.875, height = HEIGHT, width = WIDTH):
   with tf.name_scope('eval_image'):
