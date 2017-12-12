@@ -60,7 +60,7 @@ with tf.Session(graph = graph) as sess:
       image_name = int(os.path.basename(file).split('.')[0])
       top_k = predictions.argsort()[::-1]
       for node_id in top_k:
-        label_name = id_to_string[node_id]
+        label_name = id_to_string(node_id)
         score = predictions[node_id]
         result.append([image_name, label_name, str('%.8f'%score)])
         
