@@ -355,7 +355,7 @@ def model(inputs):
   net = inception_c('inception_c3', net)
   #-------------------------------------
   net = tf.nn.avg_pool(net, ksize=[1, 8, 8, 1],
-                        strides=[1, 8, 8, 1], padding='SAME', name = 'pool')
+                        strides=[1, 8, 8, 1], padding='VALID', name = 'pool')
 
   net = tf.squeeze(net)
   net = tf.nn.dropout(net, keep_prob = 0.8, name = 'drop_out')
